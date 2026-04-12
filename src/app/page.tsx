@@ -1,9 +1,19 @@
+import DefaultLayout from "@/components/Layouts/DefaultLayout";
+
+import { Metadata } from "next";
+
+export const metadata:Metadata={
+  title:'Protein Bind a platform for drug research',
+  description:"this is a description for protein bind",
+}
+
+
 export default function Home() {
   return (
     <>
-      <div className="h-screen">
-        <p>Default Layout</p>
-      </div>
+      <DefaultLayout>
+        <p>Hello dashboard page</p>
+      </DefaultLayout>
     </>
   );
 }

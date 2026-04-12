@@ -1,4 +1,4 @@
-import React, { Children } from "react";
+import React from "react";
 import Link from "next/link";
 import SidebarDropdown from "./SidebarDropdown";
 import { usePathname } from "next/navigation";
@@ -16,7 +16,7 @@ const SidebarItem = ({item, pageName, setPageName} : any)=>{
 
     const isActive = (item:any) =>{
         if(item.children){
-            return item.children.some((child:any) => isActive(Children))
+            return item.children.some((child:any) => isActive(child))
         }
         return false;
     };
@@ -29,10 +29,11 @@ const SidebarItem = ({item, pageName, setPageName} : any)=>{
             <Link
             href={item.route}
             onClick={handleClick}
-            className={`${
+            className={`group relative flex items-center gap-2.5 rounded-md px-4 py-2.5 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
                 isItemActive
-                ? "rounded-md bg-graydark dark:bg-[#1e1e1e]"
-            :""} group relative flex items-center gap-2.5 rounded-md px-15`}
+                ? "bg-graydark dark:bg-meta-4"
+                : ""
+            }`}
             >
 
                 {item.icon}
@@ -55,4 +56,4 @@ const SidebarItem = ({item, pageName, setPageName} : any)=>{
 };
 
 
-export default SidebarDropdown;
+export default SidebarItem;
