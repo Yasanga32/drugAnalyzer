@@ -1,26 +1,30 @@
+import { Resend } from "resend";
+import { VerifyEmailTemplate } from "@/components/EmailTemplates/verify-email";
+import { ResetPasswordTemplate } from "@/components/EmailTemplates/reset-email";
+
+const resend = new Resend(process.env.RESEND_KEY);
+
 export async function sendVerificationEmail(
   email: string,
   firstName: string,
   verificationUrl: string,
 ) {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/send-verification-email`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, firstName, verificationUrl }),
-    },
-  );
+  try {
+    const { data, error } = await resend.emails.send({
+      from: "ProteinBind <onboarding@resend.dev>",
+      to: [email],
+      subject: "Verify your email",
+      react: VerifyEmailTemplate({ firstName, verificationUrl }),
+    });
 
-  const data = await response.json();
+    if (error) {
+      throw new Error(JSON.stringify(error));
+    }
 
-  if (!response.ok) {
-    throw new Error(data.error || "Failed to send verification email");
+    return data;
+  } catch (error: any) {
+    throw new Error(error.message || "Failed to send verification email");
   }
-
-  return data;
 }
 
 export async function sendResetPasswordEmail(
@@ -28,22 +32,20 @@ export async function sendResetPasswordEmail(
   firstName: string,
   resetUrl: string,
 ) {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/send-reset-password-email`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, firstName, resetUrl }),
-    },
-  );
+  try {
+    const { data, error } = await resend.emails.send({
+      from: "ProteinBind <support@resend.dev>",
+      to: [email],
+      subject: "Reset your password",
+      react: ResetPasswordTemplate({ firstName, resetUrl }),
+    });
 
-  const data = await response.json();
+    if (error) {
+      throw new Error(JSON.stringify(error));
+    }
 
-  if (!response.ok) {
-    throw new Error(data.error || "Failed to send reset password email");
+    return data;
+  } catch (error: any) {
+    throw new Error(error.message || "Failed to send reset password email");
   }
-
-  return data;
 }

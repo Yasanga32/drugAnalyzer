@@ -1,10 +1,11 @@
 "use client";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ComponentHeader from "@/components/ComponentHeader/ComponentHeader";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import { createUser } from "@/lib/actions/user.action";
+import { useRouter } from "next/navigation";
 import {
   CameraIcon,
   LoaderCircle,
@@ -27,6 +28,9 @@ const SignUp: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -41,6 +45,16 @@ const SignUp: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
     setImageFile(file);
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImagePreview(null);
+    }
   };
 
   const convertImageToBase64 = async (file: File): Promise<string> => {
@@ -120,7 +134,10 @@ const SignUp: React.FC = () => {
         userBio: "",
       });
       setImageFile(null);
+      setImageFile(null);
+      setImagePreview(null);
       setIsLoading(false);
+      router.push("/auth-page/signin");
     } catch (error) {
       console.error("Error registering user:", error);
       setErrors("Registration failed.");
@@ -395,7 +412,7 @@ const SignUp: React.FC = () => {
                   </label>
                   <div className="relative">
                     <textarea
-                      name="bio"
+                      name="userBio"
                       value={user.userBio}
                       onChange={handleInputChange}
                       placeholder="Enter your bio"
@@ -409,30 +426,42 @@ const SignUp: React.FC = () => {
                     Profile Picture
                   </label>
                   <div className="relative flex items-center justify-center">
-                    {/* Hidden file input */}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="hidden"
-                      id="fileInput"
-                    />
-
                     {/* Custom icon for file input */}
                     <div
-                      onClick={() =>
-                        document.getElementById("fileInput")?.click()
-                      }
+                      onClick={() => fileInputRef.current?.click()}
                       className="flex cursor-pointer flex-col items-center"
                     >
-                      {/* Replace with any icon or image */}
-                      <CameraIcon size={25} />
-                      <span className="text-gray-500 mt-2 text-sm">
-                        Choose Profile Picture
+                      {imagePreview ? (
+                        <div className="relative h-20 w-20 overflow-hidden rounded-full border border-stroke dark:border-strokedark">
+                          <Image
+                            src={imagePreview}
+                            alt="Profile Preview"
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex h-20 w-20 items-center justify-center rounded-full border border-stroke bg-gray dark:border-strokedark dark:bg-meta-4">
+                          <CameraIcon size={30} />
+                        </div>
+                      )}
+                      <span className="text-gray-500 mt-2 text-sm text-center">
+                        {imagePreview
+                          ? "Change Profile Picture"
+                          : "Choose Profile Picture"}
                       </span>
                     </div>
                   </div>
                 </div>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  ref={fileInputRef}
+                  id="fileInput"
+                />
 
                 {errors && <div className="mb-4 text-red">{errors}</div>}
                 <div className="mb-5">
