@@ -138,9 +138,16 @@ const SignUp: React.FC = () => {
       setImagePreview(null);
       setIsLoading(false);
       router.push("/auth-page/signin");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error registering user:", error);
-      setErrors("Registration failed.");
+      let errorMessage = "Registration failed.";
+      if (error && error.message) {
+        errorMessage = error.message;
+        while (errorMessage.startsWith("Error: ")) {
+          errorMessage = errorMessage.substring(7);
+        }
+      }
+      setErrors(errorMessage);
     } finally {
       isSubmitting = false;
       setIsLoading(false);

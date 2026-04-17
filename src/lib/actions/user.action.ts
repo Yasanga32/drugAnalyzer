@@ -25,12 +25,17 @@ export async function createUser(user: CreateUserParams) {
       userBio: user.userBio || "",
     });
 
-    const verificationUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/verify-email?token=${newUser._id}`;
-    await sendVerificationEmail(
-      newUser.email,
-      newUser.firstName || "User",
-      verificationUrl,
-    );
+    try {
+      const verificationUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/verify-email?token=${newUser._id}`;
+      await sendVerificationEmail(
+        newUser.email,
+        newUser.firstName || "User",
+        verificationUrl,
+      );
+    } catch (emailError) {
+      console.error("Failed to send verification email:", emailError);
+      // Proceed with registration even if the email failed to send
+    }
 
     return JSON.parse(JSON.stringify(newUser));
   } catch (error: any) {
